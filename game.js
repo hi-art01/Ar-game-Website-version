@@ -16,11 +16,13 @@ $('turnButton').addEventListener('click', beginTurn);
 ui.fire.addEventListener('click', fire);
 document.querySelectorAll('.attack').forEach(button => button.addEventListener('click', () => { if (!state.active) return; document.querySelector('.attack.selected')?.classList.remove('selected'); button.classList.add('selected'); state.selectedAttack = button.dataset.attack; showToast(ATTACKS[state.selectedAttack].name + ' ARMED', '#55f6ff'); }));
 ui.arena.addEventListener('click', (e) => { if (state.active && !e.target.closest('.enemy')) fire(); });
+function showPanel(panel, display = 'flex') { panel.hidden = false; panel.style.display = display; }
+function hidePanel(panel) { panel.hidden = true; panel.style.display = 'none'; }
 $('soundButton').addEventListener('click', () => { state.sound = !state.sound; $('soundButton').textContent = state.sound ? '◖))' : '◖×'; });
 
 function start() {
   // Start gameplay immediately. Camera permissions can take time on mobile and must never block replay.
-  reset(); ui.start.hidden = true; ui.end.hidden = true; ui.turn.hidden = true; ui.mode.textContent = state.mode === 'ai' ? 'SOLO // AI' : 'PASS & PLAY';
+  reset(); hidePanel(ui.start); hidePanel(ui.end); hidePanel(ui.turn); ui.mode.textContent = state.mode === 'ai' ? 'SOLO // AI' : 'PASS & PLAY';
   getCamera();
   if (state.mode === 'pvp') { showTurnIntro(); } else beginRound();
 }
@@ -32,8 +34,8 @@ async function getCamera() {
 }
 function reset() { clearInterval(state.timerId); clearInterval(state.enemyId); ui.arena.innerHTML = ''; Object.assign(state, { active:false, player:100, enemy:100, enemyType:ENEMY_TYPES[0], selectedAttack:'pulse', frozen:false, time:60, shots:0, hits:0, charge:100, turn:1, pvpScores:[0,0] }); document.querySelector('.attack.selected')?.classList.remove('selected'); document.querySelector('[data-attack="pulse"]')?.classList.add('selected'); updateHud(); }
 function showTurnIntro() { ui.turn.hidden = false; $('turnTitle').innerHTML = `PLAYER ${state.turn}<br />READY?`; $('turnText').textContent = state.turn === 1 ? 'Aim for the target. You have 10 seconds to score.' : 'Pass the phone. Beat Player 1’s score!'; }
-function beginTurn() { ui.turn.hidden = true; state.time = state.mode === 'pvp' ? 10 : 60; beginRound(); }
-function beginRound() { state.active = true; ui.combat.hidden = false; ui.bottom.hidden = false; ui.attacks.hidden = false; $('playerName').textContent = state.mode === 'pvp' ? `P${state.turn}` : 'YOU'; $('enemyName').textContent = state.mode === 'pvp' ? `P${state.turn === 1 ? 2 : 1}` : 'SENTINEL'; spawnEnemy(); state.timerId = setInterval(() => { state.time--; ui.timer.textContent = state.time; if (state.time <= 0) finish(); }, 1000); if (state.mode === 'ai') state.enemyId = setInterval(enemyAttack, 1900); }
+function beginTurn() { hidePanel(ui.turn); state.time = state.mode === 'pvp' ? 10 : 60; beginRound(); }
+function beginRound() { state.active = true; showPanel(ui.combat, 'grid'); showPanel(ui.bottom, 'grid'); showPanel(ui.attacks, 'flex'); $('playerName').textContent = state.mode === 'pvp' ? `P${state.turn}` : 'YOU'; $('enemyName').textContent = state.mode === 'pvp' ? `P${state.turn === 1 ? 2 : 1}` : 'SENTINEL'; spawnEnemy(); state.timerId = setInterval(() => { state.time--; ui.timer.textContent = state.time; if (state.time <= 0) finish(); }, 1000); if (state.mode === 'ai') state.enemyId = setInterval(enemyAttack, 1900); }
 function spawnEnemy() { const old = document.querySelector('.enemy'); if (old) old.remove(); state.enemyType = ENEMY_TYPES[Math.floor(Math.random() * ENEMY_TYPES.length)]; state.enemy = state.enemyType.hp; state.frozen = false; const enemy = document.createElement('button'); enemy.className = `enemy ${state.enemyType.className}`; enemy.setAttribute('aria-label', `${state.enemyType.name} target`); enemy.innerHTML = `<span class="label">${state.enemyType.name} // LOCK</span>`; enemy.style.left = `${10 + Math.random() * 72}%`; enemy.style.top = `${20 + Math.random() * 54}%`; enemy.addEventListener('click', hitEnemy); ui.arena.append(enemy); updateHud(); showToast(`${state.enemyType.name} INBOUND`, '#ff7aad'); }
 function hitEnemy(e) { e.stopPropagation(); castAttack(state.selectedAttack, e.currentTarget); }
 function castAttack(id, target = document.querySelector('.enemy')) { const attack = ATTACKS[id]; if (!state.active || !target) return; if (state.charge < attack.cost) { showToast('NOT ENOUGH CHARGE', '#ffcf65'); return; } state.shots++; state.hits++; state.charge -= attack.cost; state.enemy = Math.max(0, state.enemy - attack.damage); if (id === 'freeze') state.frozen = true; target.classList.add('hit'); ping(id === 'nova' ? 760 : 540, .06); updateHud(); showToast(`${attack.name} HIT // -${attack.damage}`, '#55f6ff'); setTimeout(() => { if (!state.active) return; if (state.enemy <= 0) { target.remove(); showToast('TARGET DOWN — NEW THREAT', '#55f6ff'); setTimeout(spawnEnemy, 260); } else { target.classList.remove('hit'); } }, 210); }
