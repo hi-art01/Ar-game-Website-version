@@ -9,6 +9,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
+    <style>
+      .enemy-wraith:before{border-color:#bc75ff;box-shadow:inset 0 0 18px #9b55ff,0 0 20px #9b55ff;background:radial-gradient(circle,#fff 0 7%,#9b55ff 8% 16%,#9b55ff44 17% 50%,transparent 51%)}.enemy-wraith{filter:drop-shadow(0 0 14px #9b55ff)}
+      .enemy-brute:before{border-color:#ffb33e;box-shadow:inset 0 0 18px #ff8c27,0 0 20px #ff8c27;background:radial-gradient(circle,#fff 0 7%,#ff8c27 8% 18%,#ff8c273d 19% 50%,transparent 51%)}.enemy-brute{filter:drop-shadow(0 0 14px #ff8c27)}
+      .enemy-splitter:before{border-color:#6cff91;box-shadow:inset 0 0 18px #2cff67,0 0 20px #2cff67;background:radial-gradient(circle,#fff 0 7%,#2cff67 8% 16%,#2cff6744 17% 50%,transparent 51%)}.enemy-splitter{filter:drop-shadow(0 0 14px #2cff67)}
+      .attack-bar{position:absolute;z-index:6;left:50%;bottom:112px;transform:translateX(-50%);display:flex;gap:7px;width:min(360px,calc(100% - 28px));justify-content:center}.attack{min-width:84px;padding:7px 6px;border:1px solid #ffffff44;background:#070b16dd;color:#b8cbd7;font-family:Oxanium}.attack b,.attack span,.attack small{display:block}.attack b{font-size:18px;color:var(--cyan);line-height:18px}.attack span{font-size:10px;font-weight:700;letter-spacing:.08em}.attack small{font:8px 'Space Mono';color:#8397a4;margin-top:2px}.attack.selected{border-color:var(--cyan);background:#55f6ff1f;box-shadow:0 0 12px #55f6ff33}.attack:active{transform:scale(.94)}@media(max-height:650px) and (orientation:landscape){.attack-bar{bottom:78px}.attack{min-width:74px;padding:4px}.attack b{font-size:14px}.attack small{display:none}}
+    </style>
   </head>
   <body>
     <main class="app-shell">
@@ -82,6 +88,11 @@
         <button class="fire-button" id="fireButton" aria-label="Fire">FIRE</button>
         <div class="timer"><span>TIME</span><b id="timer">60</b></div>
       </footer>
+      <div class="attack-bar" id="attackBar" hidden aria-label="Spells and attacks">
+        <button class="attack selected" data-attack="pulse"><b>⚡</b><span>PULSE</span><small>12 CHG</small></button>
+        <button class="attack" data-attack="nova"><b>✹</b><span>NOVA</span><small>30 CHG</small></button>
+        <button class="attack" data-attack="freeze"><b>❄</b><span>FREEZE</span><small>22 CHG</small></button>
+      </div>
     </main>
     <script src="game.js"></script>
   </body>
