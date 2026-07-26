@@ -1,23 +1,25 @@
 const $ = (id) => document.getElementById(id);
 const ui = { camera: $('camera'), fallback: $('fallback'), arena: $('arena'), start: $('startScreen'), end: $('endCard'), turn: $('turnCard'), combat: $('combatHud'), bottom: $('bottomHud'), fire: $('fireButton'), playerHp: $('playerHealth'), enemyHp: $('enemyHealth'), playerNum: $('playerHealthNumber'), enemyNum: $('enemyHealthNumber'), timer: $('timer'), charge: $('chargeBar'), toast: $('toast'), flash: $('damageFlash'), mode: $('modeLabel') };
-let state = { mode: 'ai', active: false, player: 100, enemy: 100, time: 60, shots: 0, hits: 0, charge: 100, timerId: null, enemyId: null, turn: 1, pvpScores: [0, 0], stream: null, sound: true };
+let state = { mode: 'ai', active: false, player: 100, enemy: 100, time: 60, shots: 0, hits: 0, charge: 100, timerId: null, enemyId: null, turn: 1, pvpScores: [0, 0], stream: null, cameraRequested: false, sound: true };
 
 document.querySelectorAll('.mode-card').forEach(card => card.addEventListener('click', () => { document.querySelector('.mode-card.selected').classList.remove('selected'); card.classList.add('selected'); state.mode = card.dataset.mode; }));
 $('launchButton').addEventListener('click', start);
-$('restartButton').addEventListener('click', () => { ui.end.hidden = true; start(); });
+$('restartButton').addEventListener('click', start);
 $('turnButton').addEventListener('click', beginTurn);
 ui.fire.addEventListener('click', fire);
 ui.arena.addEventListener('click', (e) => { if (state.active && !e.target.closest('.enemy')) fire(); });
 $('soundButton').addEventListener('click', () => { state.sound = !state.sound; $('soundButton').textContent = state.sound ? '◖))' : '◖×'; });
 
-async function start() {
-  await getCamera();
-  reset(); ui.start.hidden = true; ui.mode.textContent = state.mode === 'ai' ? 'SOLO // AI' : 'PASS & PLAY';
+function start() {
+  // Start gameplay immediately. Camera permissions can take time on mobile and must never block replay.
+  reset(); ui.start.hidden = true; ui.end.hidden = true; ui.turn.hidden = true; ui.mode.textContent = state.mode === 'ai' ? 'SOLO // AI' : 'PASS & PLAY';
+  getCamera();
   if (state.mode === 'pvp') { showTurnIntro(); } else beginRound();
 }
 async function getCamera() {
-  if (state.stream || !navigator.mediaDevices?.getUserMedia) return;
-  try { state.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false }); ui.camera.srcObject = state.stream; ui.fallback.style.display = 'none'; }
+  if (state.stream || state.cameraRequested || !navigator.mediaDevices?.getUserMedia) return;
+  state.cameraRequested = true;
+  try { state.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false }); ui.camera.srcObject = state.stream; ui.fallback.style.display = 'none'; }
   catch { ui.fallback.style.display = 'block'; showToast('SIMULATION MODE', '#ffcf65'); }
 }
 function reset() { clearInterval(state.timerId); clearInterval(state.enemyId); ui.arena.innerHTML = ''; Object.assign(state, { active:false, player:100, enemy:100, time:60, shots:0, hits:0, charge:100, turn:1, pvpScores:[0,0] }); updateHud(); }
