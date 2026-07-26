@@ -10,6 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
     <style>
+      .app-shell{perspective:900px}.arena{perspective:900px;transform-style:preserve-3d}.enemy{transform-style:preserve-3d;transition:left .16s ease,top .16s ease,transform .16s ease}.enemy:before{transform:translateZ(12px)}.enemy:after{transform:translateZ(4px)}.enemy .label{transform:translateZ(16px)}
+      .projectile-layer{position:absolute;inset:0;z-index:8;pointer-events:none;perspective:900px}.projectile{position:absolute;left:50%;top:50%;width:18px;height:18px;border-radius:50%;opacity:0;transform:translate(-50%,-50%) scale(.5);box-shadow:0 0 12px currentColor,0 0 30px currentColor;background:currentColor}.projectile.travelling{opacity:1;animation:flyBolt .42s cubic-bezier(.2,.8,.3,1) forwards}.projectile-nova{color:#ffb33e;width:28px;height:28px}.projectile-freeze{color:#8eeaff}.projectile-pulse{color:#55f6ff}.projectile-enemy{color:#ff3e9d;width:22px;height:22px;animation-duration:.9s!important}@keyframes flyBolt{to{transform:translate(calc(-50% + var(--tx)),calc(-50% + var(--ty))) scale(1.4);opacity:1}}
       .enemy-wraith:before{border-color:#bc75ff;box-shadow:inset 0 0 18px #9b55ff,0 0 20px #9b55ff;background:radial-gradient(circle,#fff 0 7%,#9b55ff 8% 16%,#9b55ff44 17% 50%,transparent 51%)}.enemy-wraith{filter:drop-shadow(0 0 14px #9b55ff)}
       .enemy-brute:before{border-color:#ffb33e;box-shadow:inset 0 0 18px #ff8c27,0 0 20px #ff8c27;background:radial-gradient(circle,#fff 0 7%,#ff8c27 8% 18%,#ff8c273d 19% 50%,transparent 51%)}.enemy-brute{filter:drop-shadow(0 0 14px #ff8c27)}
       .enemy-splitter:before{border-color:#6cff91;box-shadow:inset 0 0 18px #2cff67,0 0 20px #2cff67;background:radial-gradient(circle,#fff 0 7%,#2cff67 8% 16%,#2cff6744 17% 50%,transparent 51%)}.enemy-splitter{filter:drop-shadow(0 0 14px #2cff67)}
@@ -48,6 +50,7 @@
       </section>
 
       <section class="arena" id="arena"></section>
+      <div class="projectile-layer" id="projectileLayer" aria-hidden="true"></div>
       <div class="crosshair" id="crosshair"><span></span></div>
       <div class="damage-flash" id="damageFlash"></div>
       <div class="toast" id="toast"></div>
@@ -92,6 +95,7 @@
         <button class="attack selected" data-attack="pulse"><b>⚡</b><span>PULSE</span><small>12 CHG</small></button>
         <button class="attack" data-attack="nova"><b>✹</b><span>NOVA</span><small>30 CHG</small></button>
         <button class="attack" data-attack="freeze"><b>❄</b><span>FREEZE</span><small>22 CHG</small></button>
+        <button class="dodge" id="dodgeButton"><b>↯</b><span>DODGE</span><small>MOVE / TAP</small></button>
       </div>
     </main>
     <script src="game.js"></script>
