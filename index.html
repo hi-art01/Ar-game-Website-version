@@ -2,104 +2,217 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#070b16" />
-    <title>NEON HUNT // Camera Arena</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#060a14" />
+    <title>NEON HUNT // Web AR Arena</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
-    <style>
-      #camera,.camera-fallback{transform:none!important}.app-shell{perspective:900px}.arena{perspective:900px;transform-style:preserve-3d}.enemy{width:112px;height:138px;border-radius:8px;transform-style:preserve-3d;transition:left .16s ease,top .16s ease,transform .16s ease;background:linear-gradient(135deg,#ffffff18,#55f6ff08);border:1px solid #b9fbff99;box-shadow:12px 14px 0 #02060c99,0 0 24px #55f6ff55}.enemy:before{content:"";position:absolute;inset:8px;border:2px solid currentColor;border-radius:3px;transform:translateZ(12px);background:linear-gradient(135deg,currentColor 0 2px,transparent 2px 100%),repeating-linear-gradient(0deg,transparent 0 16px,currentColor 17px 18px);opacity:.8}.enemy:after{content:"";position:absolute;inset:-7px;border:1px solid #ffffff77;border-radius:5px;transform:translateZ(-10px) rotateY(18deg);box-shadow:inset 0 0 22px currentColor,0 0 14px currentColor;animation:spin 4s linear infinite}.enemy .label{top:calc(100% + 14px);transform:translateZ(16px);font-size:9px;white-space:nowrap}.enemy-drone{color:#55f6ff}.enemy-wraith{color:#bc75ff}.enemy-brute{color:#ffb33e}.enemy-splitter{color:#6cff91}
-      .projectile-layer{position:absolute;inset:0;z-index:8;pointer-events:none;perspective:900px}.projectile{position:absolute;left:50%;top:50%;width:18px;height:18px;border-radius:50%;opacity:0;transform:translate(-50%,-50%) scale(.5);box-shadow:0 0 12px currentColor,0 0 30px currentColor;background:currentColor}.projectile.travelling{opacity:1;animation:flyBolt .42s cubic-bezier(.2,.8,.3,1) forwards}.projectile-nova{color:#ffb33e;width:28px;height:28px}.projectile-freeze{color:#8eeaff}.projectile-pulse{color:#55f6ff}.projectile-enemy{color:#ff3e9d;width:22px;height:22px;animation-duration:.9s!important}@keyframes flyBolt{to{transform:translate(calc(-50% + var(--tx)),calc(-50% + var(--ty))) scale(1.4);opacity:1}}
-      .enemy-wraith:before{border-color:#bc75ff;box-shadow:inset 0 0 18px #9b55ff,0 0 20px #9b55ff;background:radial-gradient(circle,#fff 0 7%,#9b55ff 8% 16%,#9b55ff44 17% 50%,transparent 51%)}.enemy-wraith{filter:drop-shadow(0 0 14px #9b55ff)}
-      .enemy-brute:before{border-color:#ffb33e;box-shadow:inset 0 0 18px #ff8c27,0 0 20px #ff8c27;background:radial-gradient(circle,#fff 0 7%,#ff8c27 8% 18%,#ff8c273d 19% 50%,transparent 51%)}.enemy-brute{filter:drop-shadow(0 0 14px #ff8c27)}
-      .enemy-splitter:before{border-color:#6cff91;box-shadow:inset 0 0 18px #2cff67,0 0 20px #2cff67;background:radial-gradient(circle,#fff 0 7%,#2cff67 8% 16%,#2cff6744 17% 50%,transparent 51%)}.enemy-splitter{filter:drop-shadow(0 0 14px #2cff67)}
-      .enemy-beacon{color:#ff5c85;filter:drop-shadow(0 0 18px #ff5c85)}.enemy-phantom{color:#d18cff;filter:drop-shadow(0 0 18px #d18cff);opacity:.82}.enemy-titan{color:#ffdb62;width:150px;height:178px;filter:drop-shadow(0 0 24px #ff9d27)}.enemy-hunter{color:#58a8ff;filter:drop-shadow(0 0 18px #58a8ff)}
-      .enemy-titan:before{inset:6px;border-width:3px}.enemy-titan .label{font-size:10px}.enemy-phantom:after{animation-duration:1.5s}.attack-bar{flex-wrap:wrap;bottom:112px}.attack{min-width:70px}.dodge{min-width:70px;padding:7px 6px;border:1px solid #ff3e9d88;background:#170817dd;color:#ffd4ea;font-family:Oxanium}.dodge b,.dodge span,.dodge small{display:block}.dodge b{font-size:18px;color:#ff3e9d}.dodge span{font-size:10px;font-weight:700}.dodge small{font:8px 'Space Mono';color:#aa7d92}@media(max-width:430px){.attack-bar{gap:4px;bottom:108px}.attack,.dodge{min-width:62px;padding:5px 3px}.attack b,.dodge b{font-size:15px}.attack span,.dodge span{font-size:8px}.attack small,.dodge small{font-size:7px}}
-      .attack-bar{position:absolute;z-index:6;left:50%;bottom:112px;transform:translateX(-50%);display:flex;gap:7px;width:min(360px,calc(100% - 28px));justify-content:center}.attack{min-width:84px;padding:7px 6px;border:1px solid #ffffff44;background:#070b16dd;color:#b8cbd7;font-family:Oxanium}.attack b,.attack span,.attack small{display:block}.attack b{font-size:18px;color:var(--cyan);line-height:18px}.attack span{font-size:10px;font-weight:700;letter-spacing:.08em}.attack small{font:8px 'Space Mono';color:#8397a4;margin-top:2px}.attack.selected{border-color:var(--cyan);background:#55f6ff1f;box-shadow:0 0 12px #55f6ff33}.attack:active{transform:scale(.94)}@media(max-height:650px) and (orientation:landscape){.attack-bar{bottom:78px}.attack{min-width:74px;padding:4px}.attack b{font-size:14px}.attack small{display:none}}
-    </style>
   </head>
   <body>
-    <main class="app-shell">
+    <main class="app-shell" id="appShell">
+      <!-- Camera background & canvas overlays -->
       <video id="camera" autoplay playsinline muted></video>
       <div class="camera-fallback" id="fallback">
-        <span class="grid"></span>
-        <div class="fallback-copy">CAMERA LINK OFFLINE<br /><small>TRAINING SIMULATION ACTIVE</small></div>
+        <div class="grid"></div>
+        <div class="fallback-copy">
+          <span class="pulse-dot"></span>
+          SIMULATION ARENA ONLINE<br />
+          <small>DRAG SCREEN OR GYRO TO AIM</small>
+        </div>
       </div>
 
+      <canvas id="particleCanvas"></canvas>
       <div class="vignette"></div>
       <div class="scanlines"></div>
 
+      <!-- Top Navigation / Status Header -->
       <header class="hud top-hud">
-        <div class="brand"><span class="brand-mark">✦</span><span>NEON<br />HUNT</span></div>
-        <div class="mode-pill" id="modeLabel">SOLO // AI</div>
-        <button class="sound-button" id="soundButton" aria-label="Toggle sound">◖))</button>
+        <div class="brand">
+          <span class="brand-mark">✦</span>
+          <div>
+            <span class="brand-title">NEON HUNT</span>
+            <span class="brand-sub">AR ARENA v2.0</span>
+          </div>
+        </div>
+        <div class="hud-center">
+          <div class="mode-pill" id="modeLabel">SOLO // AI</div>
+          <div class="combo-badge" id="comboBadge" hidden>COMBO <b id="comboVal">x1</b></div>
+        </div>
+        <div class="hud-controls">
+          <button class="icon-button" id="soundButton" aria-label="Toggle sound">🔊</button>
+        </div>
       </header>
 
+      <!-- Combat Health Bars & Wave Info -->
       <section class="combat-hud" id="combatHud" hidden>
         <div class="fighter player-fighter">
-          <div class="fighter-name" id="playerName">YOU</div>
+          <div class="fighter-header">
+            <span class="fighter-name" id="playerName">YOU</span>
+            <span class="health-number" id="playerHealthNumber">100</span>
+          </div>
           <div class="health-track"><i id="playerHealth"></i></div>
-          <div class="health-number" id="playerHealthNumber">100</div>
         </div>
-        <div class="round-data"><b id="roundLabel">WAVE 01</b><span id="scoreLabel">0 : 0</span></div>
+
+        <div class="round-data">
+          <b id="roundLabel">WAVE 01</b>
+          <span id="scoreLabel">0 PTS</span>
+        </div>
+
         <div class="fighter enemy-fighter">
-          <div class="fighter-name" id="enemyName">SENTINEL</div>
+          <div class="fighter-header">
+            <span class="health-number" id="enemyHealthNumber">100</span>
+            <span class="fighter-name" id="enemyName">TARGET</span>
+          </div>
           <div class="health-track"><i id="enemyHealth"></i></div>
-          <div class="health-number" id="enemyHealthNumber">100</div>
         </div>
       </section>
 
+      <!-- 360° Spatial AR Radar HUD Widget -->
+      <div class="radar-container" id="radarContainer" hidden>
+        <div class="radar" id="radar">
+          <div class="radar-sweep"></div>
+          <div class="radar-cross-h"></div>
+          <div class="radar-cross-v"></div>
+          <div class="radar-blip" id="radarBlip"></div>
+        </div>
+        <span class="radar-label">360° SENSOR</span>
+      </div>
+
+      <!-- Off-Screen Edge Pointer Indicator -->
+      <div class="offscreen-indicator" id="offscreenIndicator" hidden>
+        <div class="arrow-shape"></div>
+        <span id="offscreenDistance">12m</span>
+      </div>
+
+      <!-- 3D Arena Layer where spatial targets spawn -->
       <section class="arena" id="arena"></section>
       <div class="projectile-layer" id="projectileLayer" aria-hidden="true"></div>
-      <div class="crosshair" id="crosshair"><span></span></div>
+
+      <!-- Crosshair & Lock-on Reticle -->
+      <div class="crosshair" id="crosshair">
+        <span class="ch-ring"></span>
+        <span class="ch-dot"></span>
+        <div class="lock-brackets">
+          <span class="b-tl"></span><span class="b-tr"></span>
+          <span class="b-bl"></span><span class="b-br"></span>
+        </div>
+        <div class="lock-label" id="lockLabel">LOCKED</div>
+      </div>
+
+      <!-- Flash & Toast overlays -->
       <div class="damage-flash" id="damageFlash"></div>
       <div class="toast" id="toast"></div>
 
+      <!-- Start Screen Menu -->
       <section class="start-screen" id="startScreen">
-        <div class="eyebrow">CAMERA COMBAT SYSTEM</div>
+        <div class="hero-badge">AR COMBAT SIMULATOR</div>
         <h1>YOUR WORLD<br /><em>IS THE ARENA.</em></h1>
-        <p>Use your camera as a battlefield. Track targets, tap to fire, and survive the hunt.</p>
+        <p>Turn your phone into a spatial battlefield. Aim with device motion or touch drag, track targets in 360°, and fire!</p>
+        
         <div class="mode-select" role="group" aria-label="Game mode">
           <button class="mode-card selected" data-mode="ai">
-            <span class="mode-icon">◉</span><b>SOLO HUNT</b><small>Fight adaptive AI enemies</small>
+            <span class="mode-icon">🎯</span>
+            <div>
+              <b>SOLO HUNT</b>
+              <small>Fight escalating waves of 3D adaptive targets</small>
+            </div>
           </button>
           <button class="mode-card" data-mode="pvp">
-            <span class="mode-icon">⚔</span><b>PASS &amp; PLAY</b><small>Two players, one device</small>
+            <span class="mode-icon">⚔️</span>
+            <div>
+              <b>PASS &amp; PLAY</b>
+              <small>2 Players on 1 device — competing for top score</small>
+            </div>
           </button>
         </div>
-        <button type="button" class="launch-button" id="launchButton"><span>ARM UP</span><strong>→</strong></button>
-        <small class="permission-note">Camera access is used only in this browser tab.</small>
+
+        <button type="button" class="launch-button" id="launchButton">
+          <span>ENGAGE SYSTEM</span>
+          <strong>→</strong>
+        </button>
+        <small class="permission-note">Camera &amp; Motion permissions are used locally in your browser.</small>
       </section>
 
+      <!-- Pass & Play Turn Intermission -->
       <section class="turn-card" id="turnCard" hidden>
-        <div class="eyebrow">PASS &amp; PLAY</div>
+        <div class="eyebrow">PASS &amp; PLAY COMBAT</div>
         <h2 id="turnTitle">PLAYER 1<br />READY?</h2>
-        <p id="turnText">Aim at the arena. You have 10 seconds to land your shots.</p>
-        <button type="button" class="launch-button" id="turnButton"><span>BEGIN TURN</span><strong>→</strong></button>
+        <p id="turnText">Aim at the arena. You have 15 seconds to score maximum hits!</p>
+        <button type="button" class="launch-button" id="turnButton">
+          <span>BEGIN TURN</span>
+          <strong>→</strong>
+        </button>
       </section>
 
+      <!-- End Card Results -->
       <section class="end-card" id="endCard" hidden>
         <div class="eyebrow" id="resultTag">COMBAT COMPLETE</div>
         <h2 id="resultTitle">TARGET<br />ELIMINATED</h2>
         <p id="resultText">Your aim was precise. The arena is clear.</p>
-        <div class="result-stats"><span>ACCURACY <b id="accuracy">0%</b></span><span>HITS <b id="hits">0</b></span></div>
-        <button type="button" class="launch-button" id="restartButton"><span>PLAY AGAIN</span><strong>↻</strong></button>
+        
+        <div class="result-stats">
+          <div class="stat-box">
+            <span class="stat-label" id="stat1Label">ACCURACY</span>
+            <b id="accuracy">0%</b>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label" id="stat2Label">HITS</span>
+            <b id="hits">0</b>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">TOTAL SCORE</span>
+            <b id="finalScore">0</b>
+          </div>
+        </div>
+
+        <button type="button" class="launch-button" id="restartButton">
+          <span>PLAY AGAIN</span>
+          <strong>↻</strong>
+        </button>
       </section>
 
+      <!-- Bottom HUD: Charge bar & Fire button -->
       <footer class="bottom-hud" id="bottomHud" hidden>
-        <div><span class="ammo-label">CHARGE</span><div class="charge-track"><i id="chargeBar"></i></div></div>
-        <button class="fire-button" id="fireButton" aria-label="Fire">FIRE</button>
-        <div class="timer"><span>TIME</span><b id="timer">60</b></div>
+        <div class="charge-container">
+          <div class="hud-label-row">
+            <span class="ammo-label">PLASMA CHARGE</span>
+            <span class="charge-val" id="chargeVal">100%</span>
+          </div>
+          <div class="charge-track"><i id="chargeBar"></i></div>
+        </div>
+
+        <button class="fire-button" id="fireButton" aria-label="Fire weapon">
+          <span class="fire-inner">FIRE</span>
+        </button>
+
+        <div class="timer-box">
+          <span class="timer-label">TIME</span>
+          <b id="timer">60</b>
+        </div>
       </footer>
-      <div class="attack-bar" id="attackBar" hidden aria-label="Spells and attacks">
-        <button class="attack selected" data-attack="pulse"><b>⚡</b><span>PULSE</span><small>12 CHG</small></button>
-        <button class="attack" data-attack="nova"><b>✹</b><span>NOVA</span><small>30 CHG</small></button>
-        <button class="attack" data-attack="freeze"><b>❄</b><span>FREEZE</span><small>22 CHG</small></button>
-        <button class="attack" data-attack="beam"><b>✦</b><span>BEAM</span><small>38 CHG</small></button>
-        <button class="attack" data-attack="meteor"><b>☄</b><span>METEOR</span><small>50 CHG</small></button>
-        <button class="dodge" id="dodgeButton"><b>↯</b><span>DODGE</span><small>MOVE / TAP</small></button>
+
+      <!-- Attack Spells & Dodge Action Bar -->
+      <div class="attack-bar" id="attackBar" hidden aria-label="Weapon Systems">
+        <button class="attack selected" data-attack="pulse">
+          <b>⚡</b><span>PULSE</span><small>12 CHG</small>
+        </button>
+        <button class="attack" data-attack="nova">
+          <b>✹</b><span>NOVA</span><small>30 CHG</small>
+        </button>
+        <button class="attack" data-attack="freeze">
+          <b>❄</b><span>FREEZE</span><small>22 CHG</small>
+        </button>
+        <button class="attack" data-attack="beam">
+          <b>✦</b><span>BEAM</span><small>38 CHG</small>
+        </button>
+        <button class="attack" data-attack="meteor">
+          <b>☄</b><span>METEOR</span><small>50 CHG</small>
+        </button>
+        <button class="dodge" id="dodgeButton">
+          <b>↯</b><span>DODGE</span><small>MOVE / TAP</small>
+        </button>
       </div>
     </main>
     <script src="game.js"></script>
