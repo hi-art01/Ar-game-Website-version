@@ -33,6 +33,14 @@ const ui = {
   offscreenDist: $('offscreenDistance'),
   canvas: $('particleCanvas'),
   soundBtn: $('soundButton'),
+  recenterBtn: $('recenterButton'),
+  blasterContainer: $('blasterContainer'),
+  blasterWeapon: $('blasterWeapon'),
+  muzzleFlash: $('muzzleFlash'),
+  gunBarrel: $('gunBarrel'),
+  gunCore: $('gunCore'),
+  gunRailLeft: $('gunRailLeft'),
+  gunRailRight: $('gunRailRight'),
   comboBadge: $('comboBadge'),
   comboVal: $('comboVal'),
   scoreLabel: $('scoreLabel')
@@ -86,6 +94,8 @@ let state = {
   rawPitch: 0,
   smoothHeading: 0,
   smoothPitch: 0,
+  headingOffset: 0, // Recenter offset for heading
+  pitchOffset: 0,   // Recenter offset for pitch
   isDragActive: false,
   dragStart: { x: 0, y: 0, heading: 0, pitch: 0 },
   
@@ -290,6 +300,11 @@ $('turnButton').addEventListener('click', beginTurn);
 ui.fire.addEventListener('click', fire);
 ui.dodge.addEventListener('click', dodge);
 
+// Recenter Button
+ui.recenterBtn.addEventListener('click', () => {
+  recenterArena();
+});
+
 // Sound Toggle
 ui.soundBtn.addEventListener('click', () => {
   state.sound = !state.sound;
@@ -305,8 +320,24 @@ document.querySelectorAll('.attack').forEach(button => {
     state.selectedAttack = button.dataset.attack;
     showToast(ATTACKS[state.selectedAttack].name + ' SYSTEM ARMED', ATTACKS[state.selectedAttack].color);
     audio.play('lock');
+    updateBlasterVisibility();
   });
 });
+
+function updateBlasterVisibility() {
+  const current = state.selectedAttack;
+  if (current === 'pulse' || current === 'beam') {
+    ui.blasterContainer.hidden = false;
+    ui.blasterContainer.style.display = 'flex';
+
+    // Clear old classes
+    ui.blasterWeapon.className = 'blaster-weapon';
+    ui.blasterWeapon.classList.add(`weapon-${current}`);
+  } else {
+    ui.blasterContainer.hidden = true;
+    ui.blasterContainer.style.display = 'none';
+  }
+}
 
 // Touch / Mouse Drag Aiming Fallback (For simulation & desktop)
 window.addEventListener('pointerdown', (e) => {
@@ -336,6 +367,21 @@ function updateOrientation(event) {
   state.rawPitch = Math.max(-80, Math.min(80, event.beta || 0));
 }
 
+function recenterArena() {
+  // Sets orientation offsets so current viewport is facing yaw=0, pitch=0
+  state.headingOffset = state.rawHeading;
+  state.pitchOffset = state.rawPitch;
+
+  // Reposition existing enemy if active
+  if (state.active) {
+    state.anchor.yaw = state.headingOffset;
+    state.anchor.pitch = state.pitchOffset;
+  }
+
+  showToast('ARENA RE-CENTERED', '#55f6ff');
+  audio.play('lock');
+}
+
 // Math Utility Helpers
 function lerp(a, b, t) { return a + (b - a) * t; }
 function lerpAngle(a, b, t) {
@@ -363,11 +409,24 @@ requestAnimationFrame(animLoop);
 // Position 3D AR Target, Crosshair Lock-on, and 360° Radar
 function positionEnemyAndHUD() {
   const enemy = document.querySelector('.enemy');
-  if (!enemy) return;
+
+  // Calculate orientation relative to recentered offset
+  const curHeading = (state.smoothHeading - state.headingOffset + 360) % 360;
+  const curPitch = state.smoothPitch - state.pitchOffset;
 
   // Relative yaw and pitch deltas
   const yawDelta = (state.anchor.yaw - state.smoothHeading + 540) % 360 - 180; // -180 to +180
   const pitchDelta = state.anchor.pitch - state.smoothPitch;
+
+  // Update background parallax based on device movement to enhance 3D depth
+  const bgFallback = document.querySelector('.camera-fallback');
+  if (bgFallback) {
+    const bgX = -yawDelta * 0.4;
+    const bgY = pitchDelta * 0.4;
+    bgFallback.style.transform = `translate(${bgX}px, ${bgY}px) scale(1.1)`;
+  }
+
+  if (!enemy) return;
 
   // Perspective Projection onto camera screen space
   const focal = Math.min(window.innerWidth, window.innerHeight) * 1.1;
@@ -524,6 +583,7 @@ function beginRound() {
   showPanel(ui.bottom, 'grid');
   showPanel(ui.attacks, 'flex');
   ui.radar.hidden = false;
+  updateBlasterVisibility();
 
   $('playerName').textContent = state.mode === 'pvp' ? `PLAYER ${state.turn}` : 'YOU';
   $('enemyName').textContent = state.mode === 'pvp' ? `TARGET` : state.enemyType.name;
@@ -551,19 +611,67 @@ function spawnEnemy() {
   state.enemy = Math.round(state.enemyType.hp * (1 + (state.wave - 1) * 0.12));
   state.frozen = false;
 
-  // Set 3D Spherical position relative to current camera heading
+  // Set 3D Spherical position relative to current camera heading and recenter offsets
   state.anchor = {
-    yaw: (state.rawHeading + (-45 + Math.random() * 90) + 360) % 360,
-    pitch: -15 + Math.random() * 30,
+    yaw: (state.smoothHeading + (-30 + Math.random() * 60) + 360) % 360,
+    pitch: (state.smoothPitch + (-10 + Math.random() * 20)),
     depth: 3.2 + Math.random() * 1.8
   };
 
   const enemy = document.createElement('button');
   enemy.className = `enemy ${state.enemyType.className}`;
   enemy.setAttribute('aria-label', `${state.enemyType.name} target`);
+
+  // Generate beautiful CSS 3D nested elements based on type
+  let modelHtml = '';
+  if (state.enemyType.id === 'drone') {
+    modelHtml = `
+      <div class="model-3d-wrap drone-model">
+        <div class="drone-wing"></div>
+        <div class="drone-wing back"></div>
+        <div class="drone-core"></div>
+      </div>
+    `;
+  } else if (state.enemyType.id === 'wraith') {
+    modelHtml = `
+      <div class="model-3d-wrap wraith-model">
+        <div class="wraith-shard"></div>
+        <div class="wraith-shard"></div>
+        <div class="wraith-shard"></div>
+        <div class="wraith-shard"></div>
+        <div class="wraith-core"></div>
+      </div>
+    `;
+  } else if (state.enemyType.id === 'brute') {
+    modelHtml = `
+      <div class="model-3d-wrap brute-model">
+        <div class="brute-shield"></div>
+        <div class="brute-core"></div>
+      </div>
+    `;
+  } else if (state.enemyType.id === 'splitter') {
+    modelHtml = `
+      <div class="model-3d-wrap splitter-model">
+        <div class="splitter-prism">
+          <div class="splitter-side"></div>
+          <div class="splitter-side"></div>
+          <div class="splitter-side"></div>
+          <div class="splitter-side"></div>
+        </div>
+      </div>
+    `;
+  } else if (state.enemyType.id === 'titan') {
+    modelHtml = `
+      <div class="model-3d-wrap titan-model">
+        <div class="titan-ring-inner"></div>
+        <div class="titan-ring-outer"></div>
+        <div class="titan-orb"></div>
+      </div>
+    `;
+  }
+
   enemy.innerHTML = `
-    <div class="enemy-body"></div>
-    <div class="enemy-ring"></div>
+    ${modelHtml}
     <span class="label">${state.enemyType.name} // W-${String(state.wave).padStart(2, '0')}</span>
   `;
   
@@ -599,6 +707,27 @@ function castAttack(id, target = document.querySelector('.enemy')) {
 
   audio.play(id);
 
+  // Handle Weapon Muzzle Flash, Recoil and Beam Vibrations
+  const isGun = (id === 'pulse' || id === 'beam');
+  if (isGun) {
+    ui.muzzleFlash.classList.add('active');
+    setTimeout(() => ui.muzzleFlash.classList.remove('active'), 80);
+
+    if (id === 'pulse') {
+      ui.blasterWeapon.style.animation = 'none';
+      void ui.blasterWeapon.offsetWidth; // trigger reflow
+      ui.blasterWeapon.style.animation = 'gunRecoil 0.15s ease-out';
+    } else if (id === 'beam') {
+      // Beam charges and vibrates intense screen shake
+      ui.blasterWeapon.style.animation = 'gunVibrate 0.1s infinite';
+      ui.app.classList.add('screen-shake');
+      setTimeout(() => {
+        ui.blasterWeapon.style.animation = '';
+        ui.app.classList.remove('screen-shake');
+      }, 500);
+    }
+  }
+
   // Launch Projectile & Visual Sparks
   const rect = target.getBoundingClientRect();
   const tx = rect.left + rect.width / 2;
@@ -621,7 +750,14 @@ function castAttack(id, target = document.querySelector('.enemy')) {
     state.enemy = Math.max(0, state.enemy - hitDamage);
     state.score += hitDamage * 10 * state.combo;
 
-    if (id === 'freeze') state.frozen = true;
+    if (id === 'freeze') {
+      state.frozen = true;
+      target.classList.add('frozen-effect');
+      // Thaw after 3 seconds
+      setTimeout(() => {
+        target.classList.remove('frozen-effect');
+      }, 3000);
+    }
 
     target.classList.add('hit');
     fx.spawnExplosion(tx, ty, attack.color, 24);
@@ -650,15 +786,25 @@ function launchProjectile(kind, tx, ty, onImpact) {
   bolt.className = `projectile projectile-${kind}`;
   ui.projectiles.append(bolt);
 
-  bolt.style.setProperty('--tx', `${tx - window.innerWidth / 2}px`);
-  bolt.style.setProperty('--ty', `${ty - window.innerHeight / 2}px`);
+  if (kind === 'meteor') {
+    // Meteors fall from top-left screen corner
+    bolt.style.left = '0px';
+    bolt.style.top = '0px';
+    bolt.style.setProperty('--tx', `${tx}px`);
+    bolt.style.setProperty('--ty', `${ty}px`);
+  } else {
+    bolt.style.setProperty('--tx', `${tx - window.innerWidth / 2}px`);
+    bolt.style.setProperty('--ty', `${ty - window.innerHeight / 2}px`);
+  }
 
   requestAnimationFrame(() => bolt.classList.add('travelling'));
+
+  const travelDuration = kind === 'meteor' ? 500 : 380;
 
   setTimeout(() => {
     bolt.remove();
     onImpact();
-  }, 380);
+  }, travelDuration);
 }
 
 function dodge() {
@@ -757,6 +903,8 @@ function finish(won = true) {
   ui.attacks.hidden = true;
   ui.radar.hidden = true;
   ui.offscreen.hidden = true;
+  ui.blasterContainer.hidden = true;
+  ui.blasterContainer.style.display = 'none';
 
   if (state.mode === 'pvp') {
     state.pvpScores[state.turn - 1] = state.score;
