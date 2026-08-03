@@ -41,6 +41,7 @@
           <div class="combo-badge" id="comboBadge" hidden>COMBO <b id="comboVal">x1</b></div>
         </div>
         <div class="hud-controls">
+          <button class="icon-button" id="recenterButton" title="Recenter Arena" aria-label="Recenter Arena" style="margin-right: 8px;">🎯</button>
           <button class="icon-button" id="soundButton" aria-label="Toggle sound">🔊</button>
         </div>
       </header>
@@ -173,7 +174,7 @@
         </button>
       </section>
 
-      <!-- Bottom HUD: Charge bar & Fire button -->
+      <!-- Bottom HUD: Charge bar & Fire button & Blaster HUD Weapon Overlay -->
       <footer class="bottom-hud" id="bottomHud" hidden>
         <div class="charge-container">
           <div class="hud-label-row">
@@ -192,6 +193,21 @@
           <b id="timer">60</b>
         </div>
       </footer>
+
+      <!-- Futuristic 3D First Person Blaster Weapon HUD overlay -->
+      <div class="blaster-container" id="blasterContainer" hidden>
+        <div class="blaster-weapon" id="blasterWeapon">
+          <!-- Gun body blocks and dynamic styling for pulse/beam morphs -->
+          <div class="gun-stock"></div>
+          <div class="gun-barrel-wrap">
+            <div class="gun-rail" id="gunRailLeft"></div>
+            <div class="gun-rail" id="gunRailRight"></div>
+            <div class="gun-barrel" id="gunBarrel"></div>
+            <div class="gun-core" id="gunCore"></div>
+          </div>
+          <div class="muzzle-flash" id="muzzleFlash"></div>
+        </div>
+      </div>
 
       <!-- Attack Spells & Dodge Action Bar -->
       <div class="attack-bar" id="attackBar" hidden aria-label="Weapon Systems">
